@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+
+    <!-- 新增开始 -->
+  
+  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <!-- 最新版本的 echarts 核心 CSS 文件 -->
+    <script src="echarts/echarts.min.js"></script>
+    <!-- 最新版本的 echarts 核心 CSS 文件 -->
+    <script src="js/map/china.js"></script>
+
+    <!-- 新增地图截止 -->
+
+
+
+    <meta charset="UTF-8">
+    <title color="#66c2a5">食品营养分析系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* ... 保留原有样式 ... */
+        :root {
+            /* --primary-color: #4b6cb7;
+            --secondary-color: #37c2bb; */
+              --primary-color: #66c2a5;
+            --secondary-color: #f8f9fa;
+        }
+
+        /* body {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+        } */
+
+
+        /* 新增背景 */
+
+body {
+  /* min-height: 100vh;
+  margin: 0;      */
+width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  /* position: relative; */
+    position: static; /* 移除定位 */
+  /* overflow: hidden; */
+    overflow: auto; /* 允许滚动 */
+  background: #0a192f; /* 深海蓝基色 */
+
+}
+
+/* 新增动态背景 */
+/* 动态渐变层 */
+body::before {
+  content: '';
+  position: absolute;
+  width: 150%;
+  height: 150%;
+  background: 
+    linear-gradient(
+      335deg, 
+      rgba(16, 84, 147, 0.8) 0%, 
+      rgba(92, 167, 228, 0.6) 25%,
+      rgba(138, 43, 226, 0.4) 50%,
+      rgba(255, 105, 180, 0.2) 100%
+    ),
+    radial-gradient(
+      circle at 70% 30%,
+      rgba(255, 215, 0, 0.15) 0%,
+      transparent 40%
+    );
+  animation: gradientFlow 120s ease infinite;
+  mix-blend-mode: soft-light;
+}
+
+/* 星际粒子层 */
+body::after {
+  content: '';
+  position: absolute;
+  width: 300%;
+  height: 300%;
+  background: 
+    radial-gradient(circle, 
+      rgba(255,255,255,0.9) 6%, 
+      transparent 4%
+    ),
+    radial-gradient(circle, 
+      rgba(255,215,0,0.8) 4%, 
+      transparent 6%
+    );
+  background-size: 40px 40px;
+   background-position: 10px 10px; /* 调整粒子的起始位置 */
+  opacity: 0.3;
+  animation: 
+    particleMove 60s linear infinite,
+    particlePulse 4s ease-in-out infinite;
+}
+body::before,
+body::after {
+  transform: translate3d(0,0,0); /* 启用硬件加速 */
+  will-change: transform, opacity; /* 提前告知浏览器 */
+
+  /* 解决交互问题 */
+    pointer-events: none; /* 关键属性：允许鼠标事件穿透 */
+  z-index: 0; /* 明确设置背景层在底层 */
+}
+
+@keyframes gradientFlow {
+  0%, 100% { 
+    transform: rotate(0deg) translate(0, 0);
+    filter: hue-rotate(0deg);
+  }
+  25% { 
+    transform: rotate(2deg) translate(-5%, 3%);
+  }
+  50% { 
+    transform: rotate(-1deg) translate(5%, -2%);
+  }
+  75% { 
+    transform: rotate(3deg) translate(-3%, 4%);
+  }
+}
+/* 
+@keyframes particleMove {
+  from { transform: translate(0,0); }
+  to { transform: translate(-50%,-50%); }
+} */
+
+@keyframes particleMove {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(20px, -30px) rotate(10deg); }
+  50% { transform: translate(-40px, 50px) rotate(-15deg); }
+  75% { transform: translate(30px, 20px) rotate(5deg); }
+  100% { transform: translate(-20px, -20px) rotate(-10deg); }
+}
+
+@keyframes particlePulse {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 0.4; }
+}
+
+/* 内容容器优化 */
+.content-wrapper {
+  position: relative;
+  z-index: 1;
+  background: rgba(10, 25, 47, 0.7);
+  padding: 2rem;
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(92, 167, 228, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+
+
+
+        /* 新增截止 */
+
+        .nav-tabs .nav-link {
+            border-radius: 15px 15px 0 0;
+            transition: all 0.3s;
+            margin: 0 5px;
+            border: none;
+            color: #66c2a5 !important  ;
+        }
+
+        .nav-tabs .nav-link.active {
+            background: var(--primary-color);
+            color: white !important;
+            transform: translateY(-2px);
+        }
+
+        .analysis-card {
+            /* background: #86b7fe; */
+             background: transparent;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(10px);
+        }
+
+        .chart-container {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            height: 70vh;
+        }
+
+        .search-box {
+            max-width: 600px;
+            /* margin: 20px auto 2rem; */
+              margin: 20px 200px 0px 400px;
+            
+        }
+
+        .gradient-btn {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            color: white;
+        }
+
+
+
+
+        /* 新增 */
+        .svg-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    /* background: linear-gradient(135deg, #667eea, #764ba2); */
+       background: linear-gradient(135deg, #66c2a5, #0a846d);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    cursor: pointer;
+
+
+    /* 解决交互问题 */
+    position: relative;
+  z-index: 3; /* 高于地图 */
+    
+}
+
+.svg-button:hover {
+    transform: translateY(-2px) rotate(-5deg);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    background: linear-gradient(135deg, #764ba2, #667eea);
+}
+
+.svg-button svg {
+    transition: transform 0.3s ease;
+}
+
+.svg-button:hover svg {
+    transform: translateX(-3px);
+}
+
+.svg-button:active {
+    transform: translateY(1px);
+}
+   
+.text-primary{
+    color:#66c2a5 !important;
+}
+
+
+
+/* 解决动态画面交互问题 */
+.nav-item
+{
+    
+  position: relative;
+  z-index: 3; /* 高于地图 */
+  font-size: 23px;
+}
+
+
+.about-container
+{
+    position: relative;
+    height: 800px;
+    width: 100%;
+    background-color:#0a846d;
+}
+
+
+/* 新增地图 */
+
+    .fruit {
+            width: 100%;
+            text-align: center;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            /* 标题和图表之间的间距 */
+            font-size: 24px;
+            color: white;
+        }
+
+        .button-container {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .button-container button {
+            margin: 0 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        #main {
+            width: 1200px;
+            height: 1200px;
+            margin: auto;
+              position: relative;
+  z-index: 1; /* 确保高于背景层 */
+        }
+
+        /* 地图容器特殊处理 */
+.echarts-container { 
+  position: relative !important;
+  z-index: 2 !important;
+}
+/* 新增截止 */
+
+/* 新增地图2 */
+
+/* 新增按钮css */
+
+  .button-container {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+             position: relative;
+  z-index: 3; /* 高于地图 */
+        }
+        
+        .button-container button {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .button-container button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+
+
+        /* 改变字体颜色 */
+        .text-start
+        {
+            color: white;
+            font-size: 20px;
+        }
+        .lead text-muted mb-4
+        {
+            color: white;
+            font-size:20px;
+        }
+
+     .mb-4
+        {
+            color:white;
+        }
+    .text-center
+    {
+        color:white;
+    }
+
+
+ 
+    </style>
+</head>
+
+<body>
+    <!-- ... 保留原有HTML结构 ... -->
+    <div class="container py-4">
+        <!-- 导航 -->
+        <ul class="nav nav-tabs justify-content-center mb-4" id="myTab">
+            <li class="nav-item">
+                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#home">首页</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#analysis">营养分析</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#ranking">营养排行</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#about">各地食物年产量图</button>
+            </li>
+        </ul>
+        <!-- <div class="back-to-home">
+            <a href="index.html" class="button">返回知识图谱界面</a>
+        </div> -->
+        <a href="index1.html" class="svg-button" aria-label="返回"  >
+            <svg viewBox="0 0 24 24" width="24" height="24">
+                <path fill="currentColor" d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+            </svg>
+        </a>
+
+
+
+
+
+        <!-- 内容区域 -->
+        <div class="tab-content">
+            <!-- 首页 -->
+            <div class="tab-pane fade show active" id="home">
+                <div class="text-center py-5">
+                    <h1 class="display-4 mb-4 text-primary">食品营养分析</h1>
+                    <p class="lead text-muted mb-4">全面解析食品营养成分，助您科学管理饮食</p>
+
+                    <div class="row g-4 justify-content-center">
+                        <div class="col-md-4">
+                            <div class="card analysis-card h-100">
+                                <div class="card-body">
+                                    <h5 class="text-primary">💡 使用说明</h5>
+                                    <ul class="text-start">
+                                        <li>选择【营养分析】查看单品营养</li>
+                                        <li>选择【营养排行】查看TOP10</li>
+                                        <li>支持水果/蔬菜分类查询</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 营养分析 -->
+            <div class="tab-pane fade" id="analysis">
+                <div class="analysis-card p-4 my-4">
+                    <h3 class="text-center mb-4">🍎 食品营养分析</h3>
+
+                    <!-- 单位说明 -->
+                    <div class="unit-info text-center">
+                        <i class="fas fa-info-circle me-2 text-primary"></i>
+                        所有数值均以每100克可食用部分计算：
+                        <div class="mt-2">
+                            <span class="badge bg-primary me-2">卡路里：千卡(kcal)</span>
+                            <span class="badge bg-success me-2">维生素A：国际单位(IU)</span>
+                            <span class="badge bg-info">其他成分：克(g)</span>
+                        </div>
+                    </div>
+
+                    <div class="search-box">
+                        <div class="row g-3">
+                            <!-- <div class="col-md-3">
+                                <select class="form-select" id="categorySelect">
+                                    <option value="水果">水果</option>
+                                    <option value="蔬菜">蔬菜</option>
+                                    <option value="肉类">肉类</option>
+                                    <option value="海鲜">海鲜</option>
+                                    <option value="谷物">谷物</option>
+                                    <option value="乳品">乳品</option>
+                                    <option value="甜品">甜品</option>
+                                    <option value="烘焙类">烘焙类</option>
+                                    <option value="饮料">饮料</option>
+                                    <option value="快餐类">快餐类</option>
+                                    <option value="汤类">汤类</option>
+                                </select>
+                            </div> -->
+                            <div class="col-md-7">
+                                <input type="text" class="form-control" id="foodInput" placeholder="输入食品名称">
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn gradient-btn w-100" onclick="searchFood()">分析</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="chartContainer" class="chart-container" style="display: none;">
+                        <canvas id="pieChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 营养排行 -->
+            <div class="tab-pane fade" id="ranking">
+                <div class="analysis-card p-4 my-4">
+                    <h3 class="text-center mb-4">🏆 营养含量排行榜</h3>
+
+                    <div class="row g-3 mb-4 justify-content-center">
+                        <div class="col-md-4">
+                            <select class="form-select" id="nutrientSelect">
+                                <option value="calories">卡路里</option>
+                                <option value="protein">蛋白质</option>
+                                <option value="fats">脂肪</option>
+                                <option value="carbs">碳水化合物</option>
+                                <option value="calcium">钙</option>
+                                <option value="fiber">纤维</option>
+                                <option value="starch">淀粉</option>
+                                <option value="iron">铁</option>
+                                <option value="copper">铜</option>
+                                <option value="magnesium">镁</option>
+                                <option value="phosphorus">磷</option>
+                                <option value="potassium">钾</option>
+                                <option value="folate">叶酸</option>
+                                <option value="cholesterol">胆固醇</option>
+                                <option value="vitamin_a_iu">维生素A</option>
+                                <option value="vitamin_c">维生素C</option>
+                                <option value="vitamin_d">维生素D</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <select class="form-select" id="typeSelect">
+                                <option value="all">全部类别</option>
+                                <option value="水果">水果</option>
+                                <option value="蔬菜">蔬菜</option>
+                                <option value="海鲜">海鲜</option>
+                                <option value="肉类">肉类</option>
+                                <option value="乳品">乳品</option>
+                                <option value="坚果类">坚果类</option>
+                                <option value="汤类">汤类</option>
+                                <option value="谷物">谷物</option>
+                                <option value="甜品">甜品</option>
+                                <option value="香料">香料</option>
+                                <option value="饮料">饮料</option>
+                                <option value="快餐类">快餐类</option>
+                                <option value="油类和酱类">油类和酱类</option>
+                                <option value="烘焙类">烘焙类</option>
+                                <option value="餐饮、主菜以及配菜">餐饮、主菜以及配菜</option>
+
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <canvas id="rankingChart"
+                        width="1400"
+                        height="850"
+                        position="relative"
+                        top:100px
+                        ></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 新增地图 -->
+
+            <div class="tab-pane fade" id="about">
+            <div class="analysis-card p-4 my-4">
+                <!-- <h3 class="text-center mb-4">各地食物产量图</h3> -->
+                    <div class="ditu">
+                        <div class="button-container">
+                            <button onclick="changeData('fruit')">水果</button>
+                            <button onclick="changeData('vegetable')">蔬菜</button>
+                            <button onclick="changeData('meat')">肉类</button>
+                            <button onclick="changeData('grain')">粮食</button>
+                            <button onclick="changeData('seafood')">海鲜</button>
+                            <button onclick="changeData('dairy')">奶制品</button>
+                        </div>
+                        <div id="main">
+                            <div class="description" id="dataDescription">
+                                <!-- 内容将通过JavaScript动态生成 -->
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
+
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <script>
+        Chart.defaults.color = '#ffffff';  // 全局默认文字颜色
+        let allFoods = [];
+        let pieChart, rankingChart;
+
+        // 初始化获取所有数据
+        const fetchAllFoods = async () => {
+            try {
+                const response = await fetch('http://localhost:8080/api/foods');
+                if (!response.ok) throw new Error('数据获取失败');
+                const data = await response.json();
+                allFoods = data;
+                updateRanking();  // 初始化显示排行榜
+            } catch (error) {
+                console.error('获取数据失败:', error);
+            }
+        };
+
+        // 营养分析搜索功能
+        const searchFood = async () => {
+           // const category = document.getElementById('categorySelect').value;
+            const foodName = document.getElementById('foodInput').value.trim();
+
+            if (foodName) {
+                try {
+                    const response = await fetch(
+                        `http://localhost:8080/getNutrients/food?name=${encodeURIComponent(foodName)}`
+                    );
+
+                    if (!response.ok) throw new Error('未找到该食品');
+
+                    const responseData = await response.json(); // 获取后端返回的 JSON 数据
+                    const foodData = responseData.data; // 提取 data 属性中的内容
+
+                    document.getElementById('chartContainer').style.display = 'block';
+                    updatePieChart(foodData);
+                } catch (error) {
+                    alert("⚠️ 未找到对应食品，请检查：\n1. 食品名称是否正确\n2. 类别选择是否匹配");
+                }
+            }
+        };
+
+        // 更新饼图
+        function updatePieChart(food) {
+            if (pieChart) pieChart.destroy();
+
+            const ctx = document.getElementById('pieChart').getContext('2d');
+            pieChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['蛋白质', '脂肪', '碳水化合物', '纤维'],
+                    datasets: [{
+                        data: [food.protein, food.fats, food.carbs, food.fiber],
+                        backgroundColor: ['#4dc9f6', '#f67019', '#f53794', '#537bc4'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `${food.foodName} 营养成分分布`,
+                            font: { size: 18 }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 更新排行榜
+        // function updateRanking() {
+        //     const nutrient = document.getElementById('nutrientSelect').value;
+        //     const type = document.getElementById('typeSelect').value;
+
+        //     let filtered = allFoods;
+        //     if (type !== 'all') filtered = filtered.filter(f => f.category === type);
+
+        //     const sorted = filtered.sort((a, b) => b[nutrient] - a[nutrient]).slice(0, 10);
+
+        //     if (rankingChart) rankingChart.destroy();
+
+        //     const ctx = document.getElementById('rankingChart').getContext('2d');
+        //     rankingChart = new Chart(ctx, {
+        //         type: 'bar',
+        //         data: {
+        //             labels: sorted.map(f => f.name),
+        //             datasets: [{
+        //                 label: `${nutrient}含量 (每100克)`,
+        //                 data: sorted.map(f => f[nutrient]),
+        //                 backgroundColor: '#37c2bb',
+        //                 borderWidth: 0
+        //             }]
+        //         },
+        //         options: {
+        //             indexAxis: 'y',
+        //             plugins: {
+        //                 legend: { display: false },
+        //                 title: {
+        //                     display: true,
+        //                     text: `${nutrient}含量 TOP10 排行榜`,
+        //                     font: { size: 18 }
+        //                 }
+        //             },
+        //             scales: {
+        //                 x: {
+        //                     beginAtZero: true,
+        //                     title: { display: true, text: '含量值' }
+        //                 }
+        //             }
+        //         }
+        //     });
+        // }
+
+
+        // 更新排行榜
+        // function updateRanking() {
+        //     const nutrient = document.getElementById('nutrientSelect').value;
+        //     const type = document.getElementById('typeSelect').value;
+
+        //     const url = `http://localhost:8080/getRanking?nutrient=${encodeURIComponent(nutrient)}&type=${encodeURIComponent(type)}`;
+
+        //     fetch(url)
+        //         .then(response => {
+        //             if (!response.ok) throw new Error('获取排行榜数据失败');
+        //             return response.json().data;
+        //         })
+        //         .then(data => {
+        //             const sorted = data.slice(0, 10); // 假设后端返回的数据已经是排序好的
+
+        //             if (rankingChart) rankingChart.destroy();
+
+        //             const ctx = document.getElementById('rankingChart').getContext('2d');
+        //             rankingChart = new Chart(ctx, {
+        //                 type: 'bar',
+        //                 data: {
+        //                     labels: sorted.map(f => f.name),
+        //                     datasets: [{
+        //                         label: `${nutrient}含量 (每100克)`,
+        //                         data: sorted.map(f => f[nutrient]),
+        //                         backgroundColor: '#37c2bb',
+        //                         borderWidth: 0
+        //                     }]
+        //                 },
+        //                 options: {
+        //                     indexAxis: 'y',
+        //                     plugins: {
+        //                         legend: { display: false },
+        //                         title: {
+        //                             display: true,
+        //                             text: `${nutrient}含量 TOP10 排行榜`,
+        //                             font: { size: 18 }
+        //                         }
+        //                     },
+        //                     scales: {
+        //                         x: {
+        //                             beginAtZero: true,
+        //                             title: { display: true, text: '含量值' }
+        //                         }
+        //                     }
+        //                 }
+        //             });
+        //         })
+        //         .catch(error => {
+        //             console.error('更新排行榜时出错:', error);
+        //             alert("⚠️ 获取排行榜数据失败，请稍后再试");
+        //         });
+        // }
+        // 更新排行榜
+        function updateRanking() {
+            const nutrient = document.getElementById('nutrientSelect').value;
+            const type = document.getElementById('typeSelect').value;
+
+            const url = `http://localhost:8080/getRanking?nutrient=${encodeURIComponent(nutrient)}&type=${encodeURIComponent(type)}`;
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) throw new Error('获取排行榜数据失败');
+                    return response.json(); // 返回解析后的 JSON 数据
+                })
+                .then(data => {
+                    // 检查后端返回的数据格式
+                    if (data.code !== 1) {
+                        throw new Error(`后端返回错误: ${data.msg}`);
+                    }
+
+                    // 提取实际的数据部分
+                    const foods = data.data;
+
+                    // 确保数据包含 nutrient 字段
+                    if (!foods || !Array.isArray(foods)) {
+                        throw new Error('返回的数据格式不正确');
+                    }
+
+                    // 根据 nutrient 字段排序
+                    const sorted = foods.sort((a, b) => b[nutrient] - a[nutrient]).slice(0, 10);
+
+                    if (rankingChart) rankingChart.destroy();
+
+                    const ctx = document.getElementById('rankingChart').getContext('2d');
+                    rankingChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: sorted.map(f => f.foodName), // 使用 foodName 字段
+                            datasets: [{
+                                label: `${nutrient}含量 (每100克)`,
+                                data: sorted.map(f => f[nutrient]),
+                                backgroundColor: '#37c2bb',
+                                borderWidth: 0,
+                               
+                            }]
+                        },
+                        options: {
+                            indexAxis: 'y',
+                            plugins: {
+                                legend: { display: false },
+                                title: {
+                                    display: true,
+                                    text: `${nutrient}含量 TOP10 排行榜`,
+                                    font: { size: 18,
+                                             
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    beginAtZero: true,
+                                    title: { display: true, text: '含量值' }
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('更新排行榜时出错:', error);
+                    alert("⚠️ 获取排行榜数据失败，请稍后再试");
+                });
+        }
+
+
+
+        // 初始化
+        document.getElementById('nutrientSelect').addEventListener('change', updateRanking);
+        document.getElementById('typeSelect').addEventListener('change', updateRanking);
+        // document.getElementById('foodInput').addEventListener('input', searchFood);
+        fetchAllFoods();
+
+        // 切换标签时重置图表尺寸
+        document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
+            tab.addEventListener('shown.bs.tab', () => {
+                if (pieChart) pieChart.resize();
+                if (rankingChart) rankingChart.resize();
+            });
+        });
+    </script>
+
+
+
+
+<!-- 地图js -->
+
+
+<script type="text/javascript">
+    // 数据
+    var data = {
+        fruit: [
+            { name: "南海诸岛", value: 0 },
+            { name: '北京', value: 38.33 },
+            { name: '天津', value: 57.85 },
+            { name: '上海', value: 31.92 },
+            { name: '重庆', value: 593.28 },
+            { name: '河北', value: 1533.87 },
+            { name: '河南', value: 2542.03 },
+            { name: '云南', value: 1298.05 },
+            { name: '辽宁', value: 879.66 },
+            { name: '黑龙江', value: 189.43 },
+            { name: '湖南', value: 1208.17 },
+            { name: '安徽', value: 798.35 },
+            { name: '山东', value: 3095.51 },
+            { name: '新疆', value: 1672.61 },
+            { name: '江苏', value: 1002.13 },
+            { name: '浙江', value: 704.49 },
+            { name: '江西', value: 749.38 },
+            { name: '湖北', value: 1143.24 },
+            { name: '广西', value: 3402.46 },
+            { name: '甘肃', value: 965.46 },
+            { name: '山西', value: 1002.77 },
+            { name: '内蒙古', value: 175.54 },
+            { name: '陕西', value: 2240.78 },
+            { name: '吉林', value: 166.02 },
+            { name: '福建', value: 864.94 },
+            { name: '贵州', value: 698.87 },
+            { name: '广东', value: 2028.38 },
+            { name: '青海', value: 2.77 },
+            { name: '西藏', value: 3.14 },
+            { name: '四川', value: 1380.5 },
+            { name: '宁夏', value: 271.73 },
+            { name: '海南', value: 563.57 },
+            { name: '台湾', value: 0 },
+            { name: '香港', value: 0 },
+            { name: '澳门', value: 0 }
+        ],
+        meat: [
+            { name: "南海诸岛", value: 0 },
+            { name: '北京', value: 4.33 },
+            { name: '天津', value: 29.5 },
+            { name: '上海', value: 9.54 },
+            { name: '重庆', value: 205.27 },
+            { name: '河北', value: 478.83 },
+            { name: '河南', value: 660.04 },
+            { name: '云南', value: 521.6 },
+            { name: '辽宁', value: 446.21 },
+            { name: '黑龙江', value: 312.53 },
+            { name: '湖南', value: 580.86 },
+            { name: '安徽', value: 475.34 },
+            { name: '山东', value: 844.51 },
+            { name: '新疆', value: 204.69 },
+            { name: '江苏', value: 318.06 },
+            { name: '浙江', value: 108.49 },
+            { name: '江西', value: 359.9 },
+            { name: '湖北', value: 441.16 },
+            { name: '广西', value: 454.94 },
+            { name: '甘肃', value: 142.65 },
+            { name: '山西', value: 143.2 },
+            { name: '内蒙古', value: 284.05 },
+            { name: '陕西', value: 132.09 },
+            { name: '吉林', value: 291.04 },
+            { name: '福建', value: 296.3 },
+            { name: '贵州', value: 241.03 },
+            { name: '广东', value: 481.01 },
+            { name: '青海', value: 40.98 },
+            { name: '西藏', value: 28.63 },
+            { name: '四川', value: 685.72 },
+            { name: '宁夏', value: 36.77 },
+            { name: '海南', value: 69.2 },
+            { name: '台湾', value: 0 },
+            { name: '香港', value: 0 },
+            { name: '澳门', value: 0 }
+        ],
+        grain: [
+            { name: "南海诸岛", value: 0 },
+            { name: '北京', value: 57.6 },
+            { name: '天津', value: 270.6 },
+            { name: '上海', value: 98.3 },
+            { name: '重庆', value: 1100.7 },
+            { name: '河北', value: 3908.8 },
+            { name: '河南', value: 6719.4 },
+            { name: '云南', value: 1993.5 },
+            { name: '辽宁', value: 2500.3 },
+            { name: '黑龙江', value: 8001.7 },
+            { name: '湖南', value: 3078.1 },
+            { name: '安徽', value: 4184.3 },
+            { name: '山东', value: 5710.2 },
+            { name: '新疆', value: 2330.2 },
+            { name: '江苏', value: 3810.1 },
+            { name: '浙江', value: 650.2 },
+            { name: '江西', value: 2196.0 },
+            { name: '湖北', value: 2785.3 },
+            { name: '广西', value: 1403.8 },
+            { name: '甘肃', value: 1296.1 },
+            { name: '山西', value: 1468.7 },
+            { name: '内蒙古', value: 4100.5 },
+            { name: '陕西', value: 1352.3 },
+            { name: '吉林', value: 4266.0 },
+            { name: '福建', value: 514.4 },
+            { name: '贵州', value: 1146.1 },
+            { name: '广东', value: 1313.4 },
+            { name: '青海', value: 118.3 },
+            { name: '西藏', value: 112.9 },
+            { name: '四川', value: 3633.8 },
+            { name: '宁夏', value: 385.9 },
+            { name: '海南', value: 142.4 },
+            { name: '台湾', value: 0 },
+            { name: '香港', value: 0 },
+            { name: '澳门', value: 0 }
+        ],
+        seafood: [
+            { name: "南海诸岛", value: 0 },
+            { name: '北京', value: 4252 },
+            { name: '天津', value: 41033 },
+            { name: '上海', value: 138058 },
+            { name: '重庆', value: 0 },
+            { name: '河北', value: 813209 },
+            { name: '河南', value: 0 },
+            { name: '云南', value: 0 },
+            { name: '辽宁', value: 4027168 },
+            { name: '黑龙江', value: 0 },
+            { name: '湖南', value: 0 },
+            { name: '安徽', value: 0 },
+            { name: '山东', value: 7622454 },
+            { name: '新疆', value: 0 },
+            { name: '江苏', value: 1352220 },
+            { name: '浙江', value: 4754098 },
+            { name: '江西', value: 0 },
+            { name: '湖北', value: 0 },
+            { name: '广西', value: 2151841 },
+            { name: '甘肃', value: 0 },
+            { name: '山西', value: 0 },
+            { name: '内蒙古', value: 0 },
+            { name: '陕西', value: 0 },
+            { name: '吉林', value: 0 },
+            { name: '福建', value: 7624395 },
+            { name: '贵州', value: 0 },
+            { name: '广东', value: 4582874 },
+            { name: '青海', value: 0 },
+            { name: '西藏', value: 0 },
+            { name: '四川', value: 0 },
+            { name: '宁夏', value: 0 },
+            { name: '海南', value: 1280529 },
+            { name: '台湾', value: 0 },
+            { name: '香港', value: 0 },
+            { name: '澳门', value: 0 }
+        ],
+        dairy: [
+            { name: "南海诸岛", value: 0 },
+            { name: '北京', value: 26.22 },
+            { name: '天津', value: 51.13 },
+            { name: '上海', value: 30.22 },
+            { name: '重庆', value: 3.19 },
+            { name: '河北', value: 549.31 },
+            { name: '河南', value: 217.80 },
+            { name: '云南', value: 70.22 },
+            { name: '辽宁', value: 135.12 },
+            { name: '黑龙江', value: 501.87 },
+            { name: '湖南', value: 7.20 },
+            { name: '安徽', value: 50.74 },
+            { name: '山东', value: 304.49 },
+            { name: '新疆', value: 231.46 },
+            { name: '江苏', value: 68.78 },
+            { name: '浙江', value: 79.65 },
+            { name: '江西', value: 7.92 },
+            { name: '湖北', value: 9.18 },
+            { name: '广西', value: 13.12 },
+            { name: '甘肃', value: 92.67 },
+            { name: '山西', value: 143.14 },
+            { name: '内蒙古', value: 740.85 },
+            { name: '陕西', value: 170.46 },
+            { name: '吉林', value: 29.37 },
+            { name: '福建', value: 22.05 },
+            { name: '贵州', value: 3.73 },
+            { name: '广东', value: 19.89 },
+            { name: '青海', value: 35.30 },
+            { name: '西藏', value: 57.79 },
+            { name: '四川', value: 70.83 },
+            { name: '宁夏', value: 342.50 },
+            { name: '海南', value: 0.28 },
+            { name: '台湾', value: 0 },
+            { name: '香港', value: 0 },
+            { name: '澳门', value: 0 }
+        ],
+        vegetable: [
+            { name: "南海诸岛", value: 0 },
+            { name: '北京', value: 207.48 },
+            { name: '天津', value: 253.75 },
+            { name: '上海', value: 254.78 },
+            { name: '重庆', value: 2362.01 },
+            { name: '河北', value: 5498.04 },
+            { name: '河南', value: 8045.56 },
+            { name: '云南', value: 2960.83 },
+            { name: '辽宁', value: 2139.68 },
+            { name: '黑龙江', value: 870.47 },
+            { name: '湖南', value: 4488.81 },
+            { name: '安徽', value: 2630.14 },
+            { name: '山东', value: 9272.41 },
+            { name: '新疆', value: 2074.23 },
+            { name: '江苏', value: 6135.61 },
+            { name: '浙江', value: 1992.51 },
+            { name: '江西', value: 1860.88 },
+            { name: '湖北', value: 4502.71 },
+            { name: '广西', value: 4425.03 },
+            { name: '甘肃', value: 1822.65 },
+            { name: '山西', value: 1065.88 },
+            { name: '内蒙古', value: 1097.14 },
+            { name: '陕西', value: 2151.2 },
+            { name: '吉林', value: 540.05 },
+            { name: '福建', value: 1804.78 },
+            { name: '贵州', value: 3469.97 },
+            { name: '广东', value: 4099.33 },
+            { name: '青海', value: 158.49 },
+            { name: '西藏', value: 88.39 },
+            { name: '四川', value: 5417.87 },
+            { name: '宁夏', value: 544.54 },
+            { name: '海南', value: 632.9 },
+            { name: '台湾', value: 0 },
+            { name: '香港', value: 0 },
+            { name: '澳门', value: 0 }
+        ]
+
+    };
+
+    // 初始化图形区域
+    var myChart = echarts.init(document.getElementById('main'));
+
+    // 默认数据
+    var currentData = data.fruit;
+    var currentTitle = '水果年产量（万吨）';
+
+    // 相关属性
+    var option = {
+        tooltip: {
+            formatter: function (params, ticket, callback) {
+                return params.seriesName + '<br/>' + params.name + '：' + params.value;
+            } // 数据格式化
+        },
+        visualMap: {
+            min: 0,
+            max: 1500,
+            left: 'left',
+            top: 'bottom',
+            text: ['多', '少'], // 取值范围的文字
+            inRange: {
+                // color: ['#289A48', '#E63F31'] // 取值范围的颜色
+                // color: ['#289A48', '#55C16A', '#82E48C', '#B0F7AF', '#E63F31', '#E66A31', '#E69531']
+                //  color: [
+                //     '#36C053',  // 荧光绿（作为起点亮色）
+                //     '#8AFF99',  // 薄荷绿
+                //     '#D1FF59',  // 荧光黄绿
+                //     '#FFEA00',  // 明黄色（中间对比色）
+                //     '#FF9966',  // 珊瑚橙
+                //     '#FF6B6B',  // 亮珊瑚红
+                //     '#FF3B3B'   // 荧光红（作为终点亮色）
+                // ]
+                color: [
+                    '#00FFE0',  // 电子青（冷色起点）
+                    '#7BFF73',  // 荧光绿
+                    '#C8FF4D',  // 激光黄
+                    '#FF2B7E',  // 霓虹粉（视觉焦点）
+                    '#FF00FF',  // 品红色
+                    '#A020F0',  // 电光紫
+                    '#4B0082'   // 深靛蓝（冷色终点）
+                ]
+            },
+            show: true // 图注
+        },
+        geo: {
+            map: 'china',
+            roam: false, // 不开启缩放和平移
+            zoom: 1.23, // 视角缩放比例
+            label: {
+                normal: {
+                    show: true,
+                    fontSize: '10',
+                    color: 'rgba(0,0,0,0.7)'
+                }
+            },
+            itemStyle: {
+                normal: {
+                    borderColor: 'rgba(0, 0, 0, 0.2)'
+                },
+                emphasis: {
+                    areaColor: '#F3B329', // 鼠标选择区域颜色
+                    shadowOffsetX: 0,
+                    shadowOffsetY: 0,
+                    shadowBlur: 20,
+                    borderWidth: 0,
+                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                }
+            }
+        },
+        series: [{
+            name: currentTitle,
+            type: 'map',
+            geoIndex: 0,
+            data: currentData
+        }]
+    };
+
+    myChart.setOption(option);
+
+    // 点击事件监听
+    myChart.on('click', function (params) {
+        alert(params.name + " " + currentTitle + "为：" + params.value + "万吨");
+    });
+
+    // 切换数据函数
+    function changeData(type) {
+        currentData = data[type];
+        switch (type) {
+            case 'fruit':
+                currentTitle = '水果年产量（万吨）';
+                break;
+            case 'vegetable':
+                currentTitle = '蔬菜年产量（万吨）';
+                break;
+
+            case 'meat':
+                currentTitle = '肉类年产量（万吨）';
+                break;
+            case 'grain':
+                currentTitle = '粮食年产量（万吨）';
+                break;
+            case 'seafood':
+                currentTitle = '海鲜年产量（吨）';
+                break;
+            case 'dairy':
+                currentTitle = '乳制品年产量（万吨）';
+                break;
+        }
+        option.series[0].data = currentData;
+        option.series[0].name = currentTitle;
+        option.visualMap.max = Math.max(...currentData.map(item => item.value));
+        myChart.setOption(option);
+        document.getElementById('title').innerText = '中国各地' + currentTitle;
+    }
+
+
+
+
+
+</script>
+
+
+
+<!-- 地图js截止 -->
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
